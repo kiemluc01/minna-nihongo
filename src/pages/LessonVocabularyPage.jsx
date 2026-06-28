@@ -87,7 +87,7 @@ export default function LessonVocabulary() {
                 key={`${lessonId}-${currentWord.id}`}
                 jp={getFrontText(currentWord, scriptFilter)}
                 backLabel="Nghĩa + Romaji"
-                backText={`${currentWord.meaning || "Chưa có nghĩa"}\n${getReadingText(currentWord)}`}
+                backText={[currentWord.meaning, getReadingText(currentWord)].filter(Boolean).join("\n")}
                 speak={() => SpeechController.speak(currentWord.jp)}
               />
 

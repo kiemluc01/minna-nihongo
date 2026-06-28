@@ -1,5 +1,33 @@
 import grammarWords from "./grammar/words";
 
+const MANUAL_MEANING_OVERRIDES = {
+  "せんせい/きょうし": "giáo viên",
+  "あのひと": "người kia, người đó",
+  "あのかた": "vị kia (lịch sự)",
+  "わたし": "tôi",
+  "だれ": "ai",
+  "どなた": "ai ạ / vị nào",
+  "がくせい": "học sinh, sinh viên",
+  "かいしゃいん": "nhân viên công ty",
+  "ぎんこういん": "nhân viên ngân hàng",
+  "いしゃ": "bác sĩ",
+  "けんきゅうしゃ": "nhà nghiên cứu",
+  "だいがく": "đại học",
+  "びょういん": "bệnh viện",
+  "あめりか": "Mỹ",
+  "いぎりす": "Anh",
+  "いんど": "Ấn Độ",
+  "いんどねしあ": "Indonesia",
+  "たい": "Thái Lan",
+  "どいつ": "Đức",
+  "ふらんす": "Pháp",
+  "ぶらじる": "Brazil",
+  "かんこく": "Hàn Quốc",
+  "ちゅうごく": "Trung Quốc",
+  "にほん": "Nhật Bản",
+  "べとなむ": "Việt Nam"
+};
+
 const normalizeLookupText = (text = "") =>
   text
     .normalize("NFKC")
@@ -94,10 +122,11 @@ export const enrichVocabularyWord = (word = {}) => {
   const matchedEntries = lookupVocabularyEntry(word);
   const meanings = uniqueValues(matchedEntries.map((entry) => entry.meaning));
   const readings = uniqueValues(matchedEntries.map((entry) => entry.reading));
+  const manualMeaning = MANUAL_MEANING_OVERRIDES[normalizeLookupText(word.jp || "")] || "";
 
   return {
     ...word,
-    meaning: word.meaning || meanings.join(" / "),
+    meaning: word.meaning || manualMeaning || meanings.join(" / "),
     reading: word.reading || readings.join(" / ")
   };
 };
