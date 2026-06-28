@@ -54,7 +54,7 @@ export default function RadicalsPage() {
     <PageShell
       eyebrow="Bộ thủ"
       title="75 bộ thủ N5"
-      description="Trang học bộ thủ theo dạng flashcard để nhìn hình, nhớ cách đọc và ghi nhớ theo nhóm nét."
+      description="Trang học bộ thủ theo dạng flashcard để nhìn hình, nhớ tên bộ và ghi nhớ theo nhóm nét."
       aside={
         <>
           <p className="aside-label">Số thẻ</p>
@@ -69,7 +69,7 @@ export default function RadicalsPage() {
         <input
           className="search-input"
           type="search"
-          placeholder="Tìm radical hoặc cách đọc..."
+          placeholder="Tìm radical hoặc tên bộ..."
           value={query}
           onChange={(event) => setQuery(event.target.value)}
         />
@@ -93,7 +93,7 @@ export default function RadicalsPage() {
           <FlashCard
             key={currentRadical.radical}
             jp={currentRadical.radical}
-            backLabel="Cách đọc"
+            backLabel="Tên bộ"
             backText={currentRadical.reading}
           />
 
@@ -131,7 +131,7 @@ export default function RadicalsPage() {
               <strong>{currentRadical.strokes}</strong>
             </div>
             <div>
-              <span className="aside-label">Reading</span>
+              <span className="aside-label">Tên bộ</span>
               <strong>{currentRadical.reading}</strong>
             </div>
           </div>

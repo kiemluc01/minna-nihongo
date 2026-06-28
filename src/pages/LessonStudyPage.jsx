@@ -119,7 +119,7 @@ export default function LessonStudyPage() {
               <FlashCard
                 key={`${lesson.id}-${currentWord.jp}`}
                 jp={getFrontText(currentWord)}
-                backLabel="Nghĩa + Romaji"
+                // backLabel="Nghĩa + Romaji"
                 backText={[currentWord.meaning, getReadingText(currentWord)].filter(Boolean).join("\n")}
                 speak={() => SpeechController.speak(currentWord.jp)}
               />

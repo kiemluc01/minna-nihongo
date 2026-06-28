@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function FlashCard({
   jp,
-  backLabel = "Mặt sau",
+  backLabel = "",
   backText = "",
   speak
 }) {
