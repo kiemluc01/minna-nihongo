@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 
-import { grammarData } from "../data/grammar";
 import { hiraganaData } from "../data/hiragana";
 import { katakanaData } from "../data/katakana";
 import { lessonRoadmaps } from "../data/lessonRoadmaps";
@@ -39,24 +38,6 @@ export default function Dashboard() {
       meta: `${Object.keys(vocabularyData).length} bài học`
     },
     {
-      title: "Ngữ pháp",
-      description: "Củng cố mẫu câu N5 bằng câu hỏi trắc nghiệm ngắn.",
-      to: "/grammar",
-      meta: `${grammarData.length} mẫu câu`
-    },
-    {
-      title: "Luyện tập",
-      description: "Vào chế độ practice để luyện nhanh và kiểm tra lại kiến thức.",
-      to: "/practice",
-      meta: "Ôn tập tập trung"
-    },
-    {
-      title: "Thi thử",
-      description: "Làm bài test tổng hợp để xem mình đang ở mức nào.",
-      to: "/exam",
-      meta: "Bài kiểm tra tổng hợp"
-    },
-    {
       title: "75 bộ thủ",
       description: "Học bộ thủ bằng flashcard để nhìn cấu trúc chữ Hán nhanh hơn.",
       to: "/radicals",
@@ -78,8 +59,8 @@ export default function Dashboard() {
           <Link to="/hiragana" className="primary-action">
             Bắt đầu học
           </Link>
-          <Link to="/exam" className="secondary-action">
-            Làm bài thi thử
+          <Link to="/vocabulary" className="secondary-action">
+            Vào từ vựng
           </Link>
         </div>
 
@@ -97,8 +78,8 @@ export default function Dashboard() {
             <span>Từ vựng</span>
           </article>
           <article>
-            <strong>{grammarData.length}</strong>
-            <span>Mẫu ngữ pháp</span>
+            <strong>{radicals75.length}</strong>
+            <span>Bộ thủ</span>
           </article>
         </div>
       </section>
@@ -154,10 +135,10 @@ export default function Dashboard() {
           <h3>Gợi ý hôm nay</h3>
           <p>
             Nếu bạn đang học N5, hãy đi theo thứ tự: lộ trình 7 bài, bảng chữ cái,
-            từ vựng, ngữ pháp, rồi làm thi thử ngắn và học bộ thủ.
+            từ vựng, rồi học bộ thủ để nhớ chữ Hán nhanh hơn.
           </p>
-          <Link to="/practice" className="note-button">
-            Vào luyện tập
+          <Link to="/roadmap" className="note-button">
+            Xem lộ trình
           </Link>
         </div>
       </section>
