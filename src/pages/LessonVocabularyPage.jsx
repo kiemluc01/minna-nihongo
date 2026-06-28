@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import FlashCard from "../components/flashcard/Flashcard";
 
-import { vocabularyData } from "../data/vocabulary";
+import { useLessonsData } from "../store/useLessonsData";
 import SpeechController from "../controllers/SpeechController";
 import {
   getFrontText,
@@ -26,6 +26,7 @@ const EMPTY_WORDS = [];
 
 export default function LessonVocabulary() {
   const { lessonId } = useParams();
+  const { vocabularyData } = useLessonsData();
   const data = vocabularyData[lessonId] ?? EMPTY_WORDS;
   const [index, setIndex] = useState(0);
   const [scriptFilter, setScriptFilter] = useState("all");

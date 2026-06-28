@@ -2,11 +2,12 @@ import { Link } from "react-router-dom";
 
 import { hiraganaData } from "../data/hiragana";
 import { katakanaData } from "../data/katakana";
-import { lessonRoadmaps } from "../data/lessonRoadmaps";
 import { radicals75 } from "../data/radicals75";
-import { vocabularyData } from "../data/vocabulary";
+import { useLessonsData } from "../store/useLessonsData";
 
 export default function Dashboard() {
+  const { vocabularyData, lessonRoadmaps } = useLessonsData();
+
   const vocabularyCount = Object.values(vocabularyData).reduce(
     (total, lesson) => total + lesson.length,
     0
@@ -14,8 +15,8 @@ export default function Dashboard() {
 
   const lessons = [
     {
-      title: "Lộ trình 7 bài",
-      description: "Đi theo thứ tự bài 1 đến bài 7 với tab riêng cho từng phần.",
+      title: `Lộ trình ${lessonRoadmaps.length} bài`,
+      description: `Đi theo thứ tự bài 1 đến bài ${lessonRoadmaps.length} với tab riêng cho từng phần.`,
       to: "/roadmap",
       meta: `${lessonRoadmaps.length} bài học`
     },
@@ -134,7 +135,7 @@ export default function Dashboard() {
         <div className="dashboard-note">
           <h3>Gợi ý hôm nay</h3>
           <p>
-            Nếu bạn đang học N5, hãy đi theo thứ tự: lộ trình 7 bài, bảng chữ cái,
+            Nếu bạn đang học N5, hãy đi theo thứ tự: lộ trình {lessonRoadmaps.length} bài, bảng chữ cái,
             từ vựng, rồi học bộ thủ để nhớ chữ Hán nhanh hơn.
           </p>
           <Link to="/roadmap" className="note-button">

@@ -25,7 +25,26 @@ const MANUAL_MEANING_OVERRIDES = {
   "かんこく": "Hàn Quốc",
   "ちゅうごく": "Trung Quốc",
   "にほん": "Nhật Bản",
-  "べとなむ": "Việt Nam"
+  "べとなむ": "Việt Nam",
+  "てちょう": "sổ tay",
+  "cd": "đĩa CD",
+  "くるま": "xe, ô tô",
+  "おみやげ": "quà (lưu niệm)",
+  "じどうはんばいき": "máy bán hàng tự động",
+  "「お」くに": "quê hương, đất nước (cách nói lịch sự)",
+  "あさひるよる": "sáng, trưa, tối",
+  "「かいしゃを」やすみます": "nghỉ (làm ở công ty)",
+  "えいが": "phim",
+  "「うちへ」かえります": "về nhà",
+  "かれかのじょ": "anh ấy, bạn trai / cô ấy, bạn gái",
+  "タバコをすいます": "hút thuốc",
+  "「しゃしんを」とります": "chụp ảnh",
+  "ビデオ": "video, băng video",
+  "でんわをかけます": "gọi điện thoại",
+  "ねんがじょう": "thiệp chúc mừng năm mới",
+  "パンチ": "cái bấm lỗ (giấy)",
+  "ホッチキス": "cái bấm kim (dập ghim)",
+  "セロテープ": "băng dính, băng keo trong"
 };
 
 const normalizeLookupText = (text = "") =>
@@ -61,6 +80,12 @@ const splitLookupVariants = (text = "") => {
     .filter(Boolean);
 };
 
+const toKatakana = (text = "") =>
+  text.replace(/[ぁ-ゖ]/g, (char) => String.fromCharCode(char.charCodeAt(0) + 0x60));
+
+const toHiragana = (text = "") =>
+  text.replace(/[ァ-ヶ]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0x60));
+
 const grammarLookup = new Map();
 
 for (const entry of grammarWords) {
@@ -86,12 +111,16 @@ for (const entry of grammarWords) {
 const uniqueValues = (items) => Array.from(new Set(items.filter(Boolean)));
 
 export const lookupVocabularyEntry = (word = {}) => {
+  const baseTerms = splitLookupVariants(word.jp)
+    .concat(splitLookupVariants(word.reading))
+    .concat(splitLookupVariants(word.kanji))
+    .concat(splitLookupVariants(word.hiragana))
+    .concat(splitLookupVariants(word.katakana));
+
   const searchTerms = uniqueValues(
-    splitLookupVariants(word.jp)
-      .concat(splitLookupVariants(word.reading))
-      .concat(splitLookupVariants(word.kanji))
-      .concat(splitLookupVariants(word.hiragana))
-      .concat(splitLookupVariants(word.katakana))
+    baseTerms
+      .concat(baseTerms.map(toKatakana))
+      .concat(baseTerms.map(toHiragana))
   );
 
   const matches = [];

@@ -15,6 +15,7 @@ import ExamPage from "../pages/ExamPage"
 import RoadmapPage from "../pages/RoadmapPage";
 import LessonStudyPage from "../pages/LessonStudyPage";
 import RadicalsPage from "../pages/RadicalsPage";
+import AddLessonPage from "../pages/AddLessonPage";
 
 export default function AppRouter() {
   return (
@@ -48,6 +49,11 @@ export default function AppRouter() {
         <Route
           path="/lesson/:lessonId"
           element={<LessonStudyPage />}
+        />
+
+        <Route
+          path="/lessons/new"
+          element={<AddLessonPage />}
         />
 
         <Route

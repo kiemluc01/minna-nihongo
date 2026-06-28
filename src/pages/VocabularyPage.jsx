@@ -2,14 +2,21 @@ import { Link } from "react-router-dom";
 
 import PageShell from "../components/common/PageShell";
 
-import { lessonRoadmaps } from "../data/lessonRoadmaps";
+import { useLessonsData } from "../store/useLessonsData";
 
 export default function VocabularyPage() {
+  const { lessonRoadmaps } = useLessonsData();
+
   return (
     <PageShell
       eyebrow="Từ vựng"
       title="Vocabulary"
       description="Chọn một bài để học toàn bộ từ vựng trích trực tiếp từ file PPTX."
+      actions={
+        <Link to="/lessons/new" className="primary-button">
+          + Thêm bài mới
+        </Link>
+      }
       aside={
         <>
           <p className="aside-label">Tổng bài</p>

@@ -1,18 +1,18 @@
-import lesson1 from "./vocabulary/lesson1";
-import lesson2 from "./vocabulary/lesson2";
-import lesson3 from "./vocabulary/lesson3";
-import lesson4 from "./vocabulary/lesson4";
-import lesson5 from "./vocabulary/lesson5";
-import lesson6 from "./vocabulary/lesson6";
-import lesson7 from "./vocabulary/lesson7";
 import { enrichVocabularyList } from "./vocabularyEnrichment";
 
-export const vocabularyData = {
-  1: enrichVocabularyList(lesson1),
-  2: enrichVocabularyList(lesson2),
-  3: enrichVocabularyList(lesson3),
-  4: enrichVocabularyList(lesson4),
-  5: enrichVocabularyList(lesson5),
-  6: enrichVocabularyList(lesson6),
-  7: enrichVocabularyList(lesson7)
+// Mỗi bài học nằm trong file riêng ở "./vocabulary/lessonN.js" (N là số bài).
+// Muốn thêm bài mới chỉ cần tạo file mới theo đúng format, không cần sửa file này.
+const lessonModules = import.meta.glob("./vocabulary/lesson*.js", { eager: true });
+
+const parseLessonId = (path) => {
+  const match = path.match(/lesson(\d+)\.js$/);
+  return match ? Number(match[1]) : null;
 };
+
+export const staticVocabularyData = Object.fromEntries(
+  Object.entries(lessonModules)
+    .map(([path, module]) => [parseLessonId(path), module.default])
+    .filter(([lessonId, words]) => lessonId !== null && Array.isArray(words))
+    .sort(([a], [b]) => a - b)
+    .map(([lessonId, words]) => [lessonId, enrichVocabularyList(words)])
+);

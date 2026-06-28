@@ -5,9 +5,11 @@ import PageShell from "../components/common/PageShell";
 import { grammarData } from "../data/grammar";
 import { hiraganaData } from "../data/hiragana";
 import { katakanaData } from "../data/katakana";
-import { vocabularyData } from "../data/vocabulary";
+import { useLessonsData } from "../store/useLessonsData";
 
 export default function PracticePage() {
+  const { vocabularyData } = useLessonsData();
+
   const vocabularyCount = Object.values(vocabularyData).reduce(
     (total, lesson) => total + lesson.length,
     0

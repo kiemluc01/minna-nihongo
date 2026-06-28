@@ -1,7 +1,7 @@
 import { grammarData } from "../data/grammar";
-import { vocabularyData } from "../data/vocabulary";
 import PageShell from "../components/common/PageShell";
 import { getFrontText, getReadingText } from "../utils/vocabulary";
+import { useLessonsData } from "../store/useLessonsData";
 
 const generateExam = (grammarItems, vocabItems) => {
   const allQuestions = [
@@ -15,6 +15,8 @@ const generateExam = (grammarItems, vocabItems) => {
 };
 
 export default function ExamPage() {
+  const { vocabularyData } = useLessonsData();
+
   const vocabItems = Object.entries(vocabularyData).flatMap(([lessonId, lesson]) =>
     lesson.map((word) => ({
       id: `vocab-${lessonId}-${word.id}-${getFrontText(word)}`,
