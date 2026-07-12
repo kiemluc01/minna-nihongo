@@ -125,10 +125,6 @@ export default function Dashboard() {
               <strong>02</strong>
               <span>Card, nút và khoảng thở rõ ràng.</span>
             </div>
-            <div>
-              <strong>03</strong>
-              <span>Grid tự đổi cột theo kích thước màn hình.</span>
-            </div>
           </div>
         </div>
 
