@@ -22,7 +22,7 @@ const tabs = [
   { key: "grammar", label: "Ngữ pháp" }
 ];
 
-const emptyVocabForm = { jp: "", reading: "", meaning: "" };
+const emptyVocabForm = { jp: "", reading: "", katakana: "", meaning: "" };
 const emptyGrammarForm = { title: "", detail: "", example: "", translation: "", blank: "" };
 
 export default function LessonStudyPage() {
@@ -92,6 +92,7 @@ export default function LessonStudyPage() {
     addVocabularyWord(lesson.id, {
       jp,
       reading: vocabForm.reading.trim(),
+      katakana: vocabForm.katakana.trim(),
       meaning: vocabForm.meaning.trim()
     });
     setVocabForm(emptyVocabForm);
@@ -232,6 +233,15 @@ export default function LessonStudyPage() {
                     value={vocabForm.reading}
                     onChange={(event) => setVocabForm((current) => ({ ...current, reading: event.target.value }))}
                     placeholder="Vd: yasai"
+                  />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="add-vocab-katakana">Katakana (nếu có)</label>
+                  <input
+                    id="add-vocab-katakana"
+                    value={vocabForm.katakana}
+                    onChange={(event) => setVocabForm((current) => ({ ...current, katakana: event.target.value }))}
+                    placeholder="Vd: ヤサイ (để trống nếu từ không phải từ mượn)"
                   />
                 </div>
                 <div className="form-field span-2">
