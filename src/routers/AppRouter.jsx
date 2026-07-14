@@ -16,6 +16,7 @@ import RoadmapPage from "../pages/RoadmapPage";
 import LessonStudyPage from "../pages/LessonStudyPage";
 import RadicalsPage from "../pages/RadicalsPage";
 import AddLessonPage from "../pages/AddLessonPage";
+import GrammarExamPage from "../pages/GrammarExamPage";
 
 export default function AppRouter() {
   return (
@@ -64,6 +65,11 @@ export default function AppRouter() {
         <Route
           path="/grammar"
           element={<GrammarPage />}
+        />
+
+        <Route
+          path="/grammar-exam"
+          element={<GrammarExamPage />}
         />
 
         <Route

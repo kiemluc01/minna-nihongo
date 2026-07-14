@@ -15,7 +15,8 @@ export default {
       title: "あげます / もらいます",
       detail: "Hai động từ rất quan trọng trong ngữ cảnh trao đổi đồ vật.",
       example: "ともだちに プレゼントを あげます。",
-      translation: "Tôi tặng quà cho bạn."
+      translation: "Tôi tặng quà cho bạn.",
+      blank: "あげます"
     },
     {
       title: "かります",

@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import SpeechController from "../controllers/SpeechController";
+
 export default function GrammarQuiz({
   question,
   answer,
@@ -18,9 +20,24 @@ export default function GrammarQuiz({
     }
   };
 
+  const speakQuestion = () => {
+    const filledSentence = question.replace("_____", picked || answer);
+    SpeechController.speak(filledSentence);
+  };
+
   return (
     <article className="quiz-card">
-      <h3>{question}</h3>
+      <div className="quiz-question-row">
+        <h3>{question}</h3>
+        <button
+          type="button"
+          className="icon-button icon-button-compact"
+          onClick={speakQuestion}
+          aria-label="Nghe câu hỏi"
+        >
+          🔊
+        </button>
+      </div>
 
       <div className="quiz-options">
         {options.map((item) => (

@@ -39,6 +39,12 @@ export default function Dashboard() {
       meta: `${Object.keys(vocabularyData).length} bài học`
     },
     {
+      title: "Kiểm tra ngữ pháp",
+      description: "Chọn phạm vi bài học, app tự gen đề từ tổ hợp từ vựng và ngữ pháp.",
+      to: "/grammar-exam",
+      meta: "Đề luôn khác nhau"
+    },
+    {
       title: "75 bộ thủ",
       description: "Học bộ thủ bằng flashcard để nhìn cấu trúc chữ Hán nhanh hơn.",
       to: "/radicals",

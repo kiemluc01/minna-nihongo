@@ -27,7 +27,8 @@ export default {
       title: "どなた / だれ",
       detail: "Cách hỏi người nào, ai, trong tình huống lịch sự và thông thường.",
       example: "あの方は どなたですか。",
-      translation: "Vị kia là ai ạ?"
+      translation: "Vị kia là ai ạ?",
+      blank: "どなた"
     }
   ]
 };
