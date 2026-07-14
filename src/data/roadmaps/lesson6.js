@@ -21,13 +21,15 @@ export default {
       title: "động từ + ます",
       detail: "Mẫu câu lịch sự để nói hành động đang làm.",
       example: "みずを のみます。",
-      translation: "Tôi uống nước."
+      translation: "Tôi uống nước.",
+      blank: "のみます"
     },
     {
       title: "đối tượng + を + động từ",
       detail: "Cấu trúc nền tảng để nói ăn, uống, xem, mua.",
       example: "ほんを よみます。",
-      translation: "Tôi đọc sách."
+      translation: "Tôi đọc sách.",
+      blank: "を"
     }
   ]
 };

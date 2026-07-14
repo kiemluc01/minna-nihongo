@@ -4,12 +4,13 @@ import { useNavigate } from "react-router-dom";
 import PageShell from "../components/common/PageShell";
 import { useLessonsData } from "../store/useLessonsData";
 import { addCustomLesson, getNextCustomLessonId } from "../services/customLessonsService";
+import { parseBlankField } from "../services/grammarExamService";
 
 let uid = 0;
 const nextKey = () => `item-${Date.now()}-${uid++}`;
 
 const emptyStep = () => ({ key: nextKey(), value: "" });
-const emptyGrammarNote = () => ({ key: nextKey(), title: "", detail: "", example: "", translation: "" });
+const emptyGrammarNote = () => ({ key: nextKey(), title: "", detail: "", example: "", translation: "", blank: "" });
 const emptyVocabWord = () => ({ key: nextKey(), jp: "", reading: "", meaning: "" });
 
 export default function AddLessonPage() {
@@ -66,7 +67,8 @@ export default function AddLessonPage() {
         title: note.title.trim(),
         detail: note.detail.trim(),
         example: note.example.trim(),
-        translation: note.translation.trim()
+        translation: note.translation.trim(),
+        blank: parseBlankField(note.blank)
       }))
       .filter((note) => note.title || note.detail || note.example);
 
@@ -269,6 +271,14 @@ export default function AddLessonPage() {
                       value={note.translation}
                       onChange={(event) => updateGrammar(note.key, "translation", event.target.value)}
                       placeholder="Vd: Tôi mua rau."
+                    />
+                  </div>
+                  <div className="form-field span-2">
+                    <label>Từ cần điền khi kiểm tra (không bắt buộc)</label>
+                    <input
+                      value={note.blank}
+                      onChange={(event) => updateGrammar(note.key, "blank", event.target.value)}
+                      placeholder="Để trống nếu giống 'Mẫu ngữ pháp'. Nếu câu có nhiều từ có thể đục lỗ, nhập cách nhau bằng dấu phẩy, vd: から, まで — mỗi lần ra đề sẽ random 1 từ."
                     />
                   </div>
                 </div>

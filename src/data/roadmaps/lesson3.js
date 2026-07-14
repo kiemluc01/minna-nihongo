@@ -15,13 +15,15 @@ export default {
       title: "ここ / そこ / あそこ / どこ",
       detail: "Từ chỉ vị trí là trọng tâm của bài địa điểm.",
       example: "トイレは どこですか。",
-      translation: "Nhà vệ sinh ở đâu?"
+      translation: "Nhà vệ sinh ở đâu?",
+      blank: "どこ"
     },
     {
       title: "あります / います",
       detail: "Phân biệt vật vô tri và người/động vật khi nói vị trí.",
       example: "本が あります。",
-      translation: "Có quyển sách."
+      translation: "Có quyển sách.",
+      blank: "あります"
     },
     {
       title: "に",

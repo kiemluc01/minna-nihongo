@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import { grammarData } from "../data/grammar";
 
 import GrammarQuiz from "../components/GrammarQuiz";
@@ -9,6 +11,11 @@ export default function GrammarPage() {
       eyebrow="Ngữ pháp"
       title="Grammar"
       description="Làm các câu hỏi ngắn để ôn mẫu ngữ pháp N5 theo từng bài."
+      actions={
+        <Link to="/grammar-exam" className="primary-button">
+          Kiểm tra theo phạm vi bài
+        </Link>
+      }
       aside={
         <>
           <p className="aside-label">Số câu</p>

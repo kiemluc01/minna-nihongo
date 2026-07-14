@@ -15,7 +15,8 @@ export default {
       title: "これ / それ / あれ",
       detail: "Chỉ đồ vật gần mình, gần người nghe hoặc ở xa cả hai.",
       example: "これは ほんです。",
-      translation: "Đây là quyển sách."
+      translation: "Đây là quyển sách.",
+      blank: "これ"
     },
     {
       title: "の",

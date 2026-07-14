@@ -33,6 +33,12 @@ export default function PracticePage() {
       description: "Làm câu hỏi trắc nghiệm để củng cố mẫu câu N5.",
       to: "/grammar",
       meta: `${grammarData.length} câu`
+    },
+    {
+      title: "Kiểm tra ngữ pháp",
+      description: "Tự chọn phạm vi bài học, app gen đề từ tổ hợp từ vựng và ngữ pháp.",
+      to: "/grammar-exam",
+      meta: "Đề luôn khác nhau"
     }
   ];
 

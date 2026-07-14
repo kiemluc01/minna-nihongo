@@ -21,7 +21,8 @@ export default {
       title: "から / まで",
       detail: "Chỉ điểm bắt đầu và điểm kết thúc của hành trình.",
       example: "うちから えきまで いきます。",
-      translation: "Tôi đi từ nhà đến ga."
+      translation: "Tôi đi từ nhà đến ga.",
+      blank: ["から", "まで"]
     },
     {
       title: "で",

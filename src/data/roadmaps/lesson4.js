@@ -21,13 +21,15 @@ export default {
       title: "thời gian + に",
       detail: "Dùng để chỉ thời điểm cụ thể của một hành động.",
       example: "7じに はたらきます。",
-      translation: "Tôi làm việc lúc 7 giờ."
+      translation: "Tôi làm việc lúc 7 giờ.",
+      blank: "に"
     },
     {
       title: "まいにち / きょう",
       detail: "Từ chỉ tần suất và mốc thời gian giúp câu tự nhiên hơn.",
       example: "まいにち べんきょうします。",
-      translation: "Tôi học bài mỗi ngày."
+      translation: "Tôi học bài mỗi ngày.",
+      blank: "まいにち"
     }
   ]
 };
