@@ -11,7 +11,7 @@ const nextKey = () => `item-${Date.now()}-${uid++}`;
 
 const emptyStep = () => ({ key: nextKey(), value: "" });
 const emptyGrammarNote = () => ({ key: nextKey(), title: "", detail: "", example: "", translation: "", blank: "" });
-const emptyVocabWord = () => ({ key: nextKey(), jp: "", reading: "", meaning: "" });
+const emptyVocabWord = () => ({ key: nextKey(), jp: "", reading: "", katakana: "", meaning: "" });
 
 export default function AddLessonPage() {
   const navigate = useNavigate();
@@ -55,6 +55,7 @@ export default function AddLessonPage() {
       .map((word) => ({
         jp: word.jp.trim(),
         reading: word.reading.trim(),
+        katakana: word.katakana.trim(),
         meaning: word.meaning.trim()
       }))
       .filter((word) => word.jp)
@@ -203,6 +204,14 @@ export default function AddLessonPage() {
                       value={word.reading}
                       onChange={(event) => updateVocab(word.key, "reading", event.target.value)}
                       placeholder="Vd: yasai"
+                    />
+                  </div>
+                  <div className="form-field">
+                    <label>Katakana (nếu có)</label>
+                    <input
+                      value={word.katakana}
+                      onChange={(event) => updateVocab(word.key, "katakana", event.target.value)}
+                      placeholder="Vd: ヤサイ (để trống nếu từ không phải từ mượn)"
                     />
                   </div>
                   <div className="form-field span-2">

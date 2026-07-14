@@ -89,7 +89,13 @@ export const collectExamScope = (lessonRoadmaps, lessonIds) => {
   const vocabulary = scopedLessons.flatMap((lesson) =>
     (lesson.vocabulary || [])
       .filter((word) => word.jp && word.meaning)
-      .map((word) => ({ jp: word.jp, meaning: word.meaning, reading: word.reading, lessonId: lesson.id }))
+      .map((word) => ({
+        jp: word.jp,
+        meaning: word.meaning,
+        reading: word.reading,
+        katakana: word.katakana,
+        lessonId: lesson.id
+      }))
   );
 
   const grammarNotes = scopedLessons.flatMap((lesson) =>
@@ -115,10 +121,15 @@ const pickDistractors = (primaryPool, fallbackPool, exclude, count) => {
 };
 
 // Nếu từ có chữ Hán (kanji), ghi chú thêm cách đọc trong ngoặc, vd "先生 (せんせい)",
-// vì câu hỏi này kiểm tra nghĩa của từ chứ không kiểm tra cách đọc kanji.
+// vì câu hỏi này kiểm tra nghĩa của từ chứ không kiểm tra cách đọc kanji. Nếu
+// từ có dạng katakana riêng (vd từ mượn được nhập bằng hiragana きゃんぷ nhưng
+// có ghi chú katakana キャンプ) thì cũng ghi chú thêm trong ngoặc tương tự.
 const formatVocabPrompt = (word) => {
   if (hasKanji(word.jp) && word.reading && word.reading !== word.jp && !hasKanji(word.reading)) {
     return `${word.jp} (${word.reading})`;
+  }
+  if (word.katakana && word.katakana !== word.jp) {
+    return `${word.jp} (${word.katakana})`;
   }
   return word.jp;
 };
@@ -126,7 +137,7 @@ const formatVocabPrompt = (word) => {
 const buildVocabQuestion = (word, format, scopeMeanings, globalMeanings) => {
   const prompt = formatVocabPrompt(word);
 
-  const base = { kind: "vocab", lessonId: word.lessonId, prompt };
+  const base = { kind: "vocab", lessonId: word.lessonId, prompt, speakText: word.jp };
 
   if (format === "fill") {
     return { ...base, type: "fill", answer: word.meaning };

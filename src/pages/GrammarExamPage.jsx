@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 
 import PageShell from "../components/common/PageShell";
 import { useLessonsData } from "../store/useLessonsData";
+import SpeechController from "../controllers/SpeechController";
 import {
   generateGrammarExam,
   collectExamScope,
@@ -208,7 +209,19 @@ export default function GrammarExamPage() {
                   <p className="form-section-hint">
                     {question.kind === "vocab" ? "Nghĩa của từ dưới đây là gì?" : "Điền vào chỗ trống."}
                   </p>
-                  <h3>{question.prompt}</h3>
+                  <div className="quiz-question-row">
+                    <h3>{question.prompt}</h3>
+                    {question.kind === "vocab" && (
+                      <button
+                        type="button"
+                        className="icon-button icon-button-compact"
+                        onClick={() => SpeechController.speak(question.speakText)}
+                        aria-label="Nghe phát âm"
+                      >
+                        🔊
+                      </button>
+                    )}
+                  </div>
 
                   {question.type === "choice" ? (
                     <div className="quiz-options">
