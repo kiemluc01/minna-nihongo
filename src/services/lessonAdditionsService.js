@@ -41,6 +41,28 @@ export const addGrammarNote = (lessonId, note) => {
   writeAll(all);
 };
 
+export const updateVocabularyWord = (lessonId, index, patch) => {
+  const all = readAll();
+  const key = String(lessonId);
+  const current = all[key] || EMPTY;
+  all[key] = {
+    ...current,
+    vocabulary: current.vocabulary.map((word, i) => (i === index ? { ...word, ...patch } : word))
+  };
+  writeAll(all);
+};
+
+export const updateGrammarNote = (lessonId, index, patch) => {
+  const all = readAll();
+  const key = String(lessonId);
+  const current = all[key] || EMPTY;
+  all[key] = {
+    ...current,
+    grammarNotes: current.grammarNotes.map((note, i) => (i === index ? { ...note, ...patch } : note))
+  };
+  writeAll(all);
+};
+
 export const removeVocabularyWord = (lessonId, index) => {
   const all = readAll();
   const key = String(lessonId);
