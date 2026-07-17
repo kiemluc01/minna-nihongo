@@ -24,6 +24,8 @@ import {
 import SpeechController from "../controllers/SpeechController";
 import { getFrontText, getReadingText } from "../utils/vocabulary";
 import { parseBlankField } from "../services/grammarExamService";
+import { parseLessonFile } from "../services/lessonImportService";
+import { enrichVocabularyList } from "../data/vocabularyEnrichment";
 
 const tabs = [
   { key: "roadmap", label: "Lộ trình" },
@@ -49,6 +51,8 @@ export default function LessonStudyPage() {
 
   const [showAddVocab, setShowAddVocab] = useState(false);
   const [vocabForm, setVocabForm] = useState(emptyVocabForm);
+  const [importStatus, setImportStatus] = useState("idle");
+  const [importMessage, setImportMessage] = useState("");
   const [showAddGrammar, setShowAddGrammar] = useState(false);
   const [grammarForm, setGrammarForm] = useState(emptyGrammarForm);
 
@@ -117,6 +121,40 @@ export default function LessonStudyPage() {
       meaning: vocabForm.meaning.trim()
     });
     setVocabForm(emptyVocabForm);
+  };
+
+  const handleImportVocabFile = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setImportStatus("loading");
+    setImportMessage("");
+
+    try {
+      const rawVocabulary = await parseLessonFile(file);
+      const enriched = enrichVocabularyList(rawVocabulary);
+
+      enriched.forEach((word) => {
+        addVocabularyWord(lesson.id, {
+          jp: word.jp || "",
+          reading: word.reading || "",
+          katakana: word.katakana || "",
+          meaning: word.meaning || ""
+        });
+      });
+
+      setImportStatus("done");
+      setImportMessage(
+        `Đã thêm ${enriched.length} từ từ file "${file.name}" vào bài học. Kiểm tra lại và bổ sung nghĩa còn thiếu nếu cần.`
+      );
+    } catch (importError) {
+      setImportStatus("error");
+      setImportMessage(importError.message || "Không quét được file này.");
+    }
   };
 
   const handleRemoveCurrentWord = () => {
@@ -313,7 +351,20 @@ export default function LessonStudyPage() {
             >
               {showAddVocab ? "Đóng" : "+ Thêm từ vựng"}
             </button>
+            <label className="secondary-button add-item-button import-file-label">
+              {importStatus === "loading" ? "Đang quét..." : "Quét file PPT/PDF"}
+              <input
+                type="file"
+                accept=".pptx,.pdf"
+                onChange={handleImportVocabFile}
+                disabled={importStatus === "loading"}
+                hidden
+              />
+            </label>
           </div>
+          {importMessage && (
+            <p className={importStatus === "error" ? "form-error" : "import-success-message"}>{importMessage}</p>
+          )}
 
           {showAddVocab && (
             <form className="inline-add-form" onSubmit={handleAddVocabSubmit}>

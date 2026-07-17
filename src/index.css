@@ -547,6 +547,8 @@ h3 {
 .section-toolbar {
   display: flex;
   justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .inline-add-form {
@@ -1099,6 +1101,20 @@ h3 {
 
 .form-section-hint {
   color: var(--muted);
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.import-file-row {
+  display: flex;
+}
+
+.import-file-label {
+  cursor: pointer;
+}
+
+.import-success-message {
+  color: var(--accent-strong);
   font-size: 0.92rem;
   margin: 0;
 }
