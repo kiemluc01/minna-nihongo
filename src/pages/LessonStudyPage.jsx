@@ -3,15 +3,24 @@ import { useNavigate, useParams } from "react-router-dom";
 
 import FlashCard from "../components/flashcard/Flashcard";
 import PageShell from "../components/common/PageShell";
+import KaiwaSection from "../components/kaiwa/KaiwaSection";
 
 import { useLessonsData, findLessonRoadmap } from "../store/useLessonsData";
 import { deleteCustomLesson } from "../services/customLessonsService";
 import {
   addVocabularyWord,
   addGrammarNote,
+  updateVocabularyWord,
+  updateGrammarNote,
   removeVocabularyWord,
   removeGrammarNote
 } from "../services/lessonAdditionsService";
+import {
+  setVocabOverride,
+  clearVocabOverride,
+  setGrammarOverride,
+  clearGrammarOverride
+} from "../services/lessonOverridesService";
 import SpeechController from "../controllers/SpeechController";
 import { getFrontText, getReadingText } from "../utils/vocabulary";
 import { parseBlankField } from "../services/grammarExamService";
@@ -19,11 +28,16 @@ import { parseBlankField } from "../services/grammarExamService";
 const tabs = [
   { key: "roadmap", label: "Lộ trình" },
   { key: "vocabulary", label: "Từ vựng" },
-  { key: "grammar", label: "Ngữ pháp" }
+  { key: "grammar", label: "Ngữ pháp" },
+  { key: "kaiwa", label: "Hội thoại" }
 ];
 
 const emptyVocabForm = { jp: "", reading: "", katakana: "", meaning: "" };
 const emptyGrammarForm = { title: "", detail: "", example: "", translation: "", blank: "" };
+
+const blankToInputValue = (blank) => (Array.isArray(blank) ? blank.join(", ") : blank || "");
+
+const grammarKeyOf = (item) => (item.isAdded ? `a-${item.additionIndex}` : `s-${item.staticIndex}`);
 
 export default function LessonStudyPage() {
   const { lessonId } = useParams();
@@ -37,6 +51,11 @@ export default function LessonStudyPage() {
   const [vocabForm, setVocabForm] = useState(emptyVocabForm);
   const [showAddGrammar, setShowAddGrammar] = useState(false);
   const [grammarForm, setGrammarForm] = useState(emptyGrammarForm);
+
+  const [showEditVocab, setShowEditVocab] = useState(false);
+  const [editVocabForm, setEditVocabForm] = useState(emptyVocabForm);
+  const [editingGrammarKey, setEditingGrammarKey] = useState(null);
+  const [editGrammarForm, setEditGrammarForm] = useState(emptyGrammarForm);
 
   const lessonNumber = useMemo(
     () => Number.parseInt(lessonId, 10),
@@ -66,10 +85,12 @@ export default function LessonStudyPage() {
   const currentWord = lesson.vocabulary[currentVocabIndex];
 
   const goToPreviousVocab = () => {
+    setShowEditVocab(false);
     setVocabIndex((current) => (current - 1 + vocabCount) % vocabCount);
   };
 
   const goToNextVocab = () => {
+    setShowEditVocab(false);
     setVocabIndex((current) => (current + 1) % vocabCount);
   };
 
@@ -106,6 +127,44 @@ export default function LessonStudyPage() {
     setVocabIndex(0);
   };
 
+  const openEditVocab = () => {
+    setEditVocabForm({
+      jp: currentWord.jp || "",
+      reading: currentWord.reading || "",
+      katakana: currentWord.katakana || "",
+      meaning: currentWord.meaning || ""
+    });
+    setShowEditVocab(true);
+  };
+
+  const handleEditVocabSubmit = (event) => {
+    event.preventDefault();
+    const jp = editVocabForm.jp.trim();
+
+    if (!jp) {
+      return;
+    }
+
+    const patch = {
+      jp,
+      reading: editVocabForm.reading.trim(),
+      katakana: editVocabForm.katakana.trim(),
+      meaning: editVocabForm.meaning.trim()
+    };
+
+    if (currentWord.isAdded) {
+      updateVocabularyWord(lesson.id, currentWord.additionIndex, patch);
+    } else {
+      setVocabOverride(lesson.id, currentWord.id, patch);
+    }
+    setShowEditVocab(false);
+  };
+
+  const handleResetVocab = () => {
+    clearVocabOverride(lesson.id, currentWord.id);
+    setShowEditVocab(false);
+  };
+
   const handleAddGrammarSubmit = (event) => {
     event.preventDefault();
     const title = grammarForm.title.trim();
@@ -128,6 +187,48 @@ export default function LessonStudyPage() {
 
   const handleRemoveGrammarNote = (note) => {
     removeGrammarNote(lesson.id, note.additionIndex);
+  };
+
+  const openEditGrammar = (item) => {
+    setEditGrammarForm({
+      title: item.title || "",
+      detail: item.detail || "",
+      example: item.example || "",
+      translation: item.translation || "",
+      blank: blankToInputValue(item.blank)
+    });
+    setEditingGrammarKey(grammarKeyOf(item));
+  };
+
+  const handleEditGrammarSubmit = (item) => (event) => {
+    event.preventDefault();
+    const title = editGrammarForm.title.trim();
+    const detail = editGrammarForm.detail.trim();
+    const example = editGrammarForm.example.trim();
+
+    if (!title && !detail && !example) {
+      return;
+    }
+
+    const patch = {
+      title,
+      detail,
+      example,
+      translation: editGrammarForm.translation.trim(),
+      blank: parseBlankField(editGrammarForm.blank)
+    };
+
+    if (item.isAdded) {
+      updateGrammarNote(lesson.id, item.additionIndex, patch);
+    } else {
+      setGrammarOverride(lesson.id, item.staticIndex, patch);
+    }
+    setEditingGrammarKey(null);
+  };
+
+  const handleResetGrammar = (item) => {
+    clearGrammarOverride(lesson.id, item.staticIndex);
+    setEditingGrammarKey(null);
   };
 
   return (
@@ -264,13 +365,71 @@ export default function LessonStudyPage() {
 
           {currentWord && (
             <>
-              <FlashCard
-                key={`${lesson.id}-${currentWord.jp}`}
-                jp={getFrontText(currentWord)}
-                // backLabel="Nghĩa + Romaji"
-                backText={[currentWord.meaning, getReadingText(currentWord)].filter(Boolean).join("\n")}
-                speak={() => SpeechController.speak(currentWord.jp)}
-              />
+              {!showEditVocab ? (
+                <FlashCard
+                  key={`${lesson.id}-${currentWord.jp}`}
+                  jp={getFrontText(currentWord)}
+                  // backLabel="Nghĩa + Romaji"
+                  backText={[currentWord.meaning, getReadingText(currentWord)].filter(Boolean).join("\n")}
+                  speak={() => SpeechController.speak(currentWord.jp)}
+                />
+              ) : (
+                <form className="inline-add-form" onSubmit={handleEditVocabSubmit}>
+                  <div className="form-grid">
+                    <div className="form-field">
+                      <label htmlFor="edit-vocab-jp">Tiếng Nhật *</label>
+                      <input
+                        id="edit-vocab-jp"
+                        value={editVocabForm.jp}
+                        onChange={(event) => setEditVocabForm((current) => ({ ...current, jp: event.target.value }))}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label htmlFor="edit-vocab-reading">Cách đọc</label>
+                      <input
+                        id="edit-vocab-reading"
+                        value={editVocabForm.reading}
+                        onChange={(event) =>
+                          setEditVocabForm((current) => ({ ...current, reading: event.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label htmlFor="edit-vocab-katakana">Katakana (nếu có)</label>
+                      <input
+                        id="edit-vocab-katakana"
+                        value={editVocabForm.katakana}
+                        onChange={(event) =>
+                          setEditVocabForm((current) => ({ ...current, katakana: event.target.value }))
+                        }
+                      />
+                    </div>
+                    <div className="form-field span-2">
+                      <label htmlFor="edit-vocab-meaning">Nghĩa tiếng Việt</label>
+                      <input
+                        id="edit-vocab-meaning"
+                        value={editVocabForm.meaning}
+                        onChange={(event) =>
+                          setEditVocabForm((current) => ({ ...current, meaning: event.target.value }))
+                        }
+                      />
+                    </div>
+                  </div>
+                  <div className="form-actions">
+                    <button type="submit" className="primary-button">
+                      Lưu chỉnh sửa
+                    </button>
+                    <button type="button" className="secondary-button" onClick={() => setShowEditVocab(false)}>
+                      Hủy
+                    </button>
+                    {currentWord.isOverridden && (
+                      <button type="button" className="remove-item-button" onClick={handleResetVocab}>
+                        Khôi phục mặc định
+                      </button>
+                    )}
+                  </div>
+                </form>
+              )}
 
               <div className="study-controls">
                 <button
@@ -291,6 +450,10 @@ export default function LessonStudyPage() {
                   Next
                 </button>
 
+                <button type="button" className="secondary-button" onClick={openEditVocab}>
+                  Sửa từ này
+                </button>
+
                 {currentWord.isAdded && (
                   <button type="button" className="remove-item-button" onClick={handleRemoveCurrentWord}>
                     Xóa từ này
@@ -307,6 +470,12 @@ export default function LessonStudyPage() {
                   <span className="aside-label">Total</span>
                   <strong>{vocabCount}</strong>
                 </div>
+                {currentWord.isOverridden && (
+                  <div>
+                    <span className="aside-label">Trạng thái</span>
+                    <strong>Đã chỉnh sửa</strong>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -392,43 +561,131 @@ export default function LessonStudyPage() {
               </article>
             )}
 
-            {lesson.grammarNotes.map((item, index) => (
-              <article key={`${item.title}-${index}`} className="grammar-note-card">
-                <span className="lesson-kicker">Mẫu câu</span>
-                <h3>{item.title}</h3>
-                <p>{item.detail}</p>
-                <div className="grammar-example-row">
-                  <div className="grammar-example">
-                    {item.example}
-                  </div>
-                  {item.example && (
-                    <button
-                      type="button"
-                      className="icon-button icon-button-compact"
-                      onClick={() => SpeechController.speak(item.example)}
-                      aria-label="Nghe câu ví dụ"
-                    >
-                      🔊
-                    </button>
+            {lesson.grammarNotes.map((item, index) => {
+              const key = grammarKeyOf(item);
+              const isEditing = editingGrammarKey === key;
+
+              return (
+                <article key={`${item.title}-${index}`} className="grammar-note-card">
+                  {!isEditing ? (
+                    <>
+                      <span className="lesson-kicker">
+                        Mẫu câu{item.isOverridden ? " · Đã chỉnh sửa" : ""}
+                      </span>
+                      <h3>{item.title}</h3>
+                      <p>{item.detail}</p>
+                      <div className="grammar-example-row">
+                        <div className="grammar-example">
+                          {item.example}
+                        </div>
+                        {item.example && (
+                          <button
+                            type="button"
+                            className="icon-button icon-button-compact"
+                            onClick={() => SpeechController.speak(item.example)}
+                            aria-label="Nghe câu ví dụ"
+                          >
+                            🔊
+                          </button>
+                        )}
+                      </div>
+                      {item.translation && (
+                        <p className="grammar-translation">{item.translation}</p>
+                      )}
+                      <div className="dynamic-list-item-top">
+                        <button type="button" className="secondary-button" onClick={() => openEditGrammar(item)}>
+                          Sửa
+                        </button>
+                        {item.isAdded && (
+                          <button
+                            type="button"
+                            className="remove-item-button"
+                            onClick={() => handleRemoveGrammarNote(item)}
+                          >
+                            Xóa
+                          </button>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <form onSubmit={handleEditGrammarSubmit(item)}>
+                      <div className="form-field">
+                        <label>Mẫu ngữ pháp</label>
+                        <input
+                          value={editGrammarForm.title}
+                          onChange={(event) =>
+                            setEditGrammarForm((current) => ({ ...current, title: event.target.value }))
+                          }
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label>Giải thích</label>
+                        <input
+                          value={editGrammarForm.detail}
+                          onChange={(event) =>
+                            setEditGrammarForm((current) => ({ ...current, detail: event.target.value }))
+                          }
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label>Câu ví dụ (tiếng Nhật)</label>
+                        <input
+                          value={editGrammarForm.example}
+                          onChange={(event) =>
+                            setEditGrammarForm((current) => ({ ...current, example: event.target.value }))
+                          }
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label>Dịch nghĩa</label>
+                        <input
+                          value={editGrammarForm.translation}
+                          onChange={(event) =>
+                            setEditGrammarForm((current) => ({ ...current, translation: event.target.value }))
+                          }
+                        />
+                      </div>
+                      <div className="form-field">
+                        <label>Từ cần điền khi kiểm tra</label>
+                        <input
+                          value={editGrammarForm.blank}
+                          onChange={(event) =>
+                            setEditGrammarForm((current) => ({ ...current, blank: event.target.value }))
+                          }
+                          placeholder="Nhiều từ cách nhau bằng dấu phẩy, vd: から, まで."
+                        />
+                      </div>
+                      <div className="form-actions">
+                        <button type="submit" className="primary-button">
+                          Lưu chỉnh sửa
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary-button"
+                          onClick={() => setEditingGrammarKey(null)}
+                        >
+                          Hủy
+                        </button>
+                        {item.isOverridden && (
+                          <button
+                            type="button"
+                            className="remove-item-button"
+                            onClick={() => handleResetGrammar(item)}
+                          >
+                            Khôi phục mặc định
+                          </button>
+                        )}
+                      </div>
+                    </form>
                   )}
-                </div>
-                {item.translation && (
-                  <p className="grammar-translation">{item.translation}</p>
-                )}
-                {item.isAdded && (
-                  <button
-                    type="button"
-                    className="remove-item-button"
-                    onClick={() => handleRemoveGrammarNote(item)}
-                  >
-                    Xóa
-                  </button>
-                )}
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
         </section>
       )}
+
+      {activeTab === "kaiwa" && <KaiwaSection key={lesson.id} lessonId={lesson.id} />}
     </PageShell>
   );
 }
