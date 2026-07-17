@@ -5,6 +5,8 @@ import PageShell from "../components/common/PageShell";
 import { useLessonsData } from "../store/useLessonsData";
 import { addCustomLesson, getNextCustomLessonId } from "../services/customLessonsService";
 import { parseBlankField } from "../services/grammarExamService";
+import { parseLessonFile, suggestLessonMeta } from "../services/lessonImportService";
+import { enrichVocabularyList } from "../data/vocabularyEnrichment";
 
 let uid = 0;
 const nextKey = () => `item-${Date.now()}-${uid++}`;
@@ -24,11 +26,54 @@ export default function AddLessonPage() {
   const [grammarNotes, setGrammarNotes] = useState([emptyGrammarNote()]);
   const [vocabulary, setVocabulary] = useState([emptyVocabWord(), emptyVocabWord()]);
   const [error, setError] = useState("");
+  const [importStatus, setImportStatus] = useState("idle");
+  const [importMessage, setImportMessage] = useState("");
 
   const maxStaticId = Math.max(
     0,
     ...lessonRoadmaps.filter((lesson) => !lesson.isCustom).map((lesson) => lesson.id)
   );
+
+  const handleFileImport = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setImportStatus("loading");
+    setImportMessage("");
+    setError("");
+
+    try {
+      const rawVocabulary = await parseLessonFile(file);
+      const enriched = enrichVocabularyList(rawVocabulary);
+
+      setVocabulary(
+        enriched.map((word) => ({
+          key: nextKey(),
+          jp: word.jp || "",
+          reading: word.reading || "",
+          katakana: word.katakana || "",
+          meaning: word.meaning || ""
+        }))
+      );
+
+      const suggestion = suggestLessonMeta(enriched);
+      if (!title.trim() && suggestion.title) setTitle(suggestion.title);
+      if (!subtitle.trim() && suggestion.subtitle) setSubtitle(suggestion.subtitle);
+      if (!focus.trim() && suggestion.focus) setFocus(suggestion.focus);
+
+      setImportStatus("done");
+      setImportMessage(
+        `Đã quét được ${enriched.length} từ từ file "${file.name}". Tên bài học/mô tả/trọng tâm bên dưới là gợi ý dựa trên nghĩa từ vựng quét được — vui lòng kiểm tra và chỉnh lại cho đúng. Ngữ pháp vẫn cần nhập tay.`
+      );
+    } catch (importError) {
+      setImportStatus("error");
+      setImportMessage(importError.message || "Không quét được file này.");
+    }
+  };
 
   const updateStep = (key, value) =>
     setRoadmapSteps((steps) => steps.map((step) => (step.key === key ? { ...step, value } : step)));
@@ -105,6 +150,33 @@ export default function AddLessonPage() {
       description="Nhập từ vựng và ngữ pháp theo đúng format hiện tại. Bài học được lưu ngay trong trình duyệt này và xuất hiện trong lộ trình."
     >
       <form className="lesson-form" onSubmit={handleSubmit}>
+        <section className="form-section">
+          <div className="form-section-heading">
+            <h2>Quét từ vựng từ file PPT/PDF (tùy chọn)</h2>
+          </div>
+          <p className="form-section-hint">
+            Chọn file .pptx hoặc .pdf (như các file "Bai 1.pptx"..."Bai 7.pptx" đang dùng, mỗi slide/dòng là
+            một từ) để tự động điền danh sách từ vựng bên dưới, đồng thời gợi ý sẵn tên bài học/mô tả/trọng
+            tâm dựa trên nghĩa các từ quét được. File gốc không có tiêu đề hay ngữ pháp nên đây chỉ là gợi ý —
+            hãy kiểm tra và chỉnh lại tên bài học, mô tả, và tự nhập phần ngữ pháp cho đúng.
+          </p>
+          <div className="import-file-row">
+            <label className="secondary-button add-item-button import-file-label">
+              {importStatus === "loading" ? "Đang quét..." : "Chọn file để quét"}
+              <input
+                type="file"
+                accept=".pptx,.pdf"
+                onChange={handleFileImport}
+                disabled={importStatus === "loading"}
+                hidden
+              />
+            </label>
+          </div>
+          {importMessage && (
+            <p className={importStatus === "error" ? "form-error" : "import-success-message"}>{importMessage}</p>
+          )}
+        </section>
+
         <section className="form-section">
           <div className="form-section-heading">
             <h2>Thông tin chung</h2>
