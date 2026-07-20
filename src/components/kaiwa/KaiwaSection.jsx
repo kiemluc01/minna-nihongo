@@ -151,6 +151,13 @@ export default function KaiwaSection({ lessonId }) {
 
   const handleSubmitExercise = () => setExerciseSubmitted(true);
 
+  const handleCloseExercise = () => {
+    stopAudio();
+    setExercise(null);
+    setExerciseAnswer("");
+    setExerciseSubmitted(false);
+  };
+
   const exerciseIsCorrect = exerciseSubmitted && exercise && isKaiwaAnswerCorrect(exerciseAnswer, exercise.answer);
 
   if (mode === "setup") {
@@ -267,64 +274,66 @@ export default function KaiwaSection({ lessonId }) {
   // mode === "view"
   return (
     <>
-      <section className="form-section">
-        <div className="form-section-heading">
-          <h2>Hội thoại</h2>
-          <div className="form-actions">
-            <button type="button" className="secondary-button" onClick={handleEditExisting}>
-              Sửa hội thoại
-            </button>
-            <button type="button" className="remove-item-button" onClick={handleDeleteKaiwa}>
-              Xóa
-            </button>
-          </div>
-        </div>
-
-        <div className="script-filter-bar">
-          {kaiwa.speakers.map((speaker) => (
-            <span key={speaker.id} className="filter-chip">
-              {speaker.name}
-            </span>
-          ))}
-        </div>
-
-        <div className="kaiwa-lines">
-          {kaiwa.lines.map((line, index) => (
-            <div key={line.id} className={`kaiwa-line ${activeLineIndex === index ? "is-active" : ""}`}>
-              <span className="kaiwa-speaker">{kaiwa.speakers.find((s) => s.id === line.speakerId)?.name}：</span>
-              <span>{line.text}</span>
-              {line.translation && <p className="grammar-translation">{line.translation}</p>}
+      {!exercise && (
+        <section className="form-section">
+          <div className="form-section-heading">
+            <h2>Hội thoại</h2>
+            <div className="form-actions">
+              <button type="button" className="secondary-button" onClick={handleEditExisting}>
+                Sửa hội thoại
+              </button>
+              <button type="button" className="remove-item-button" onClick={handleDeleteKaiwa}>
+                Xóa
+              </button>
             </div>
-          ))}
-        </div>
+          </div>
 
-        <div className="form-actions">
-          {audioState === "idle" && (
-            <button
-              type="button"
-              className="icon-button"
-              onClick={() => playAudio(kaiwa.lines.map((line) => line.text))}
-            >
-              🔊 Nghe hội thoại
-            </button>
-          )}
-          {audioState === "playing" && (
-            <button type="button" className="secondary-button" onClick={pauseAudio}>
-              ⏸ Tạm dừng
-            </button>
-          )}
-          {audioState === "paused" && (
-            <button type="button" className="primary-button" onClick={resumeAudio}>
-              ▶ Tiếp tục
-            </button>
-          )}
-          {audioState !== "idle" && (
-            <button type="button" className="secondary-button" onClick={stopAudio}>
-              ⏹ Dừng
-            </button>
-          )}
-        </div>
-      </section>
+          <div className="script-filter-bar">
+            {kaiwa.speakers.map((speaker) => (
+              <span key={speaker.id} className="filter-chip">
+                {speaker.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="kaiwa-lines">
+            {kaiwa.lines.map((line, index) => (
+              <div key={line.id} className={`kaiwa-line ${activeLineIndex === index ? "is-active" : ""}`}>
+                <span className="kaiwa-speaker">{kaiwa.speakers.find((s) => s.id === line.speakerId)?.name}：</span>
+                <span>{line.text}</span>
+                {line.translation && <p className="grammar-translation">{line.translation}</p>}
+              </div>
+            ))}
+          </div>
+
+          <div className="form-actions">
+            {audioState === "idle" && (
+              <button
+                type="button"
+                className="icon-button"
+                onClick={() => playAudio(kaiwa.lines.map((line) => line.text))}
+              >
+                🔊 Nghe hội thoại
+              </button>
+            )}
+            {audioState === "playing" && (
+              <button type="button" className="secondary-button" onClick={pauseAudio}>
+                ⏸ Tạm dừng
+              </button>
+            )}
+            {audioState === "paused" && (
+              <button type="button" className="primary-button" onClick={resumeAudio}>
+                ▶ Tiếp tục
+              </button>
+            )}
+            {audioState !== "idle" && (
+              <button type="button" className="secondary-button" onClick={stopAudio}>
+                ⏹ Dừng
+              </button>
+            )}
+          </div>
+        </section>
+      )}
 
       <section className="form-section">
         <div className="form-section-heading">
@@ -349,10 +358,16 @@ export default function KaiwaSection({ lessonId }) {
           <button type="button" className="primary-button" onClick={handleGenerateExercise}>
             {exercise ? "Bài tập khác" : "Tạo bài tập"}
           </button>
+          {exercise && (
+            <button type="button" className="secondary-button" onClick={handleCloseExercise}>
+              Đóng bài tập
+            </button>
+          )}
         </div>
 
         {exercise && (
           <>
+            <p className="form-section-hint">Đoạn hội thoại mẫu đang được ẩn để tránh lộ đáp án khi làm bài.</p>
             <div className="kaiwa-lines">
               {exercise.lines.map((line) => (
                 <div key={line.id} className={`kaiwa-line ${line.isBlank ? "is-blank" : ""}`}>

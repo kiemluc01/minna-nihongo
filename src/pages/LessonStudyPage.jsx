@@ -422,7 +422,7 @@ export default function LessonStudyPage() {
                   jp={getFrontText(currentWord)}
                   // backLabel="Nghĩa + Romaji"
                   backText={[currentWord.meaning, getReadingText(currentWord)].filter(Boolean).join("\n")}
-                  speak={() => SpeechController.speak(currentWord.jp)}
+                  speak={() => SpeechController.speak(currentWord.reading || currentWord.jp)}
                 />
               ) : (
                 <form className="inline-add-form" onSubmit={handleEditVocabSubmit}>

@@ -137,7 +137,7 @@ const formatVocabPrompt = (word) => {
 const buildVocabQuestion = (word, format, scopeMeanings, globalMeanings) => {
   const prompt = formatVocabPrompt(word);
 
-  const base = { kind: "vocab", lessonId: word.lessonId, prompt, speakText: word.jp };
+  const base = { kind: "vocab", lessonId: word.lessonId, prompt, speakText: word.reading || word.jp };
 
   if (format === "fill") {
     return { ...base, type: "fill", answer: word.meaning };
