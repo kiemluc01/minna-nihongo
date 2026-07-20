@@ -29,11 +29,13 @@ export const speakJapanese =
   return true;
 };
 
-// Đọc lần lượt nhiều câu (dùng cho hội thoại) mà không cắt ngang câu trước —
-// SpeechSynthesis tự xếp hàng các utterance được speak() liên tiếp mà không
-// gọi cancel() ở giữa, nên cả đoạn hội thoại phát tuần tự đúng thứ tự. Trả về
-// bộ điều khiển pause/resume/stop, và bắn onLineStart(index) khi từng câu bắt
-// đầu để UI có thể tô sáng câu đang đọc.
+// Đọc lần lượt nhiều câu (dùng cho hội thoại), mỗi câu cách nhau một khoảng
+// nghỉ ngắn (GAP_MS) cho dễ nghe. Các utterance được xếp hàng và phát từng câu
+// một (không speak() hết một lượt) để có thể chèn khoảng nghỉ giữa chừng bằng
+// setTimeout. Trả về bộ điều khiển pause/resume/stop, và bắn onLineStart(index)
+// khi từng câu bắt đầu để UI có thể tô sáng câu đang đọc.
+const GAP_MS = 600;
+
 export const speakSequence = (texts = [], { onLineStart, onEnd } = {}) => {
   const noop = () => {};
 
@@ -50,8 +52,32 @@ export const speakSequence = (texts = [], { onLineStart, onEnd } = {}) => {
   const voices = window.speechSynthesis.getVoices();
   const japaneseVoice = voices.find((voice) => voice.lang?.startsWith("ja"));
 
-  texts.forEach((text, index) => {
-    const utterance = new SpeechSynthesisUtterance(text);
+  let index = 0;
+  let stopped = false;
+  let paused = false;
+  let inGap = false;
+  let gapTimeoutId = null;
+
+  const clearGapTimer = () => {
+    if (gapTimeoutId !== null) {
+      clearTimeout(gapTimeoutId);
+      gapTimeoutId = null;
+    }
+  };
+
+  const speakNext = () => {
+    if (stopped) {
+      return;
+    }
+
+    if (index >= texts.length) {
+      onEnd?.();
+      return;
+    }
+
+    inGap = false;
+    const currentIndex = index;
+    const utterance = new SpeechSynthesisUtterance(texts[currentIndex]);
     utterance.lang = "ja-JP";
     utterance.rate = 0.9;
     utterance.pitch = 1;
@@ -61,18 +87,65 @@ export const speakSequence = (texts = [], { onLineStart, onEnd } = {}) => {
       utterance.voice = japaneseVoice;
     }
 
-    utterance.onstart = () => onLineStart?.(index);
+    utterance.onstart = () => onLineStart?.(currentIndex);
 
-    if (index === texts.length - 1) {
-      utterance.onend = () => onEnd?.();
-    }
+    utterance.onend = () => {
+      if (stopped) {
+        return;
+      }
+
+      index += 1;
+
+      if (index >= texts.length) {
+        onEnd?.();
+        return;
+      }
+
+      inGap = true;
+
+      if (paused) {
+        return;
+      }
+
+      gapTimeoutId = setTimeout(() => {
+        gapTimeoutId = null;
+        if (!stopped && !paused) {
+          speakNext();
+        }
+      }, GAP_MS);
+    };
 
     window.speechSynthesis.speak(utterance);
-  });
+  };
+
+  speakNext();
 
   return {
-    pause: () => window.speechSynthesis.pause(),
-    resume: () => window.speechSynthesis.resume(),
-    stop: () => window.speechSynthesis.cancel()
+    pause: () => {
+      paused = true;
+      if (inGap) {
+        clearGapTimer();
+      } else {
+        window.speechSynthesis.pause();
+      }
+    },
+    resume: () => {
+      if (!paused) {
+        return;
+      }
+
+      paused = false;
+
+      if (inGap) {
+        speakNext();
+      } else {
+        window.speechSynthesis.resume();
+      }
+    },
+    stop: () => {
+      stopped = true;
+      clearGapTimer();
+      window.speechSynthesis.cancel();
+    }
   };
 };
