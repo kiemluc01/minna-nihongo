@@ -89,7 +89,7 @@ export default function LessonVocabulary() {
                 jp={getFrontText(currentWord, scriptFilter)}
                 // backLabel="Nghĩa + Romaji"
                 backText={[currentWord.meaning, getReadingText(currentWord)].filter(Boolean).join("\n")}
-                speak={() => SpeechController.speak(currentWord.jp)}
+                speak={() => SpeechController.speak(currentWord.reading || currentWord.jp)}
               />
 
               <div className="study-controls">
