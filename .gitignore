@@ -28,3 +28,11 @@ dist-ssr
 *.sw?
 
 .claude/
+
+# Test artifacts
+coverage
+test-results
+playwright-report
+blob-report
+.playwright
+docs/
